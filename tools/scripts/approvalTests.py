@@ -18,9 +18,11 @@ if os.name == 'nt':
 rootPath = os.path.join(catchPath, 'tests/SelfTest/Baselines')
 # Init so it is guaranteed to fail loudly if the scoping gets messed up
 outputDirPath = None
+exeName = None
 
 if len(sys.argv) == 3:
     cmdPath = sys.argv[1]
+    exeName = os.path.basename(cmdPath)
     outputDirBasePath = sys.argv[2]
     outputDirPath = os.path.join(outputDirBasePath, 'ApprovalTests')
     if not os.path.isdir(outputDirPath):
@@ -64,12 +66,6 @@ durationParser = re.compile(r''' duration=['"][0-9]+['"]''')
 timestampsParser = re.compile(r'\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}Z')
 versionParser = re.compile(r'[0-9]+\.[0-9]+\.[0-9]+(-\w*\.[0-9]+)?')
 nullParser = re.compile(r'\b(__null|nullptr)\b')
-exeNameParser = re.compile(r'''
-    \b
-    SelfTest                  # Expected executable name
-    (?:.exe)?                 # Executable name contains .exe on Windows.
-    \b
-''', re.VERBOSE)
 # This is a hack until something more reasonable is figured out
 specialCaseParser = re.compile(r'file\((\d+)\)')
 
@@ -139,7 +135,7 @@ def filterLine(line, isCompact):
     line = nullParser.sub("0", line)
 
     # strip executable name
-    line = exeNameParser.sub("<exe-name>", line)
+    line = line.replace(exeName, "<exe-name>")
 
     # strip hexadecimal numbers (presumably pointer values)
     line = hexParser.sub("0x<hex digits>", line)
